@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from rest_framework import generics
+from postings.models import BlogPost
+from .serializers import BlogPostSerializer
 
-# Create your views here.
+class BlogPostRudView(generics.RetrieveUpdateDestroyAPIView):
+    lookup_field = 'id'
+    serializer_class = BlogPostSerializer
+
+    def get_queryset(self):
+        return BlogPost.objects.all()
