@@ -50,5 +50,4 @@ class BlogPostRudView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return BlogPost.objects.all()
     
-    def get_serializer_context(self,*arg,**kwargs):
-        return {"request":self.request}
+    
