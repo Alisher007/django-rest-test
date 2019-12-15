@@ -33,11 +33,11 @@ class BlogPostAPITestCase(APITestCase):
         response = self.client.get(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_post_item(self):
-        data = {"title":"some title", "content":"some content"}
-        url = api_reverse('api-postings:post-listcreate')
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    # def test_post_item(self):
+    #     data = {"user":1,"title":"some title5555", "content":"some content22"}
+    #     url = api_reverse('api-postings:post-listcreate')
+    #     response = self.client.post(url, data, format='json')
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
     def test_get_item(self):
         blog_post = BlogPost.objects.first()
@@ -49,9 +49,9 @@ class BlogPostAPITestCase(APITestCase):
     def test_update_item(self):
         blog_post = BlogPost.objects.first()
         url = blog_post.get_api_url()
-        data = {"title":"some title", "content":"some content"}
+        data = {"user":1,"title":"some title", "content":"some content"}
         
-        response = self.client.post(url, data, format='json')
+        response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_item_with_user(self):
@@ -64,6 +64,40 @@ class BlogPostAPITestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token_rsp)
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+
+    def test_post_item_with_user(self):
+        user_obj = User.objects.first()
+        payload = payload_handler(user_obj)
+        token_rsp = encode_handler(payload)
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token_rsp)
+
+        data = {"user":1,"title":"some title", "content":"some content"}
+        url = api_reverse('api-postings:post-listcreate')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_user_ownership(self):
+        owner = User.objects.create(username="test2")
+        blog_post = BlogPost.objects.create(
+            user=owner, 
+            title='new title',
+            content='some content'
+            )
+        user_obj = User.objects.first()
+        self.assertNotEqual(user_obj.username, owner.username)
+
+        payload = payload_handler(user_obj)
+        token_rsp = encode_handler(payload)
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token_rsp)
+
+        url = blog_post.get_api_url()
+        data = {"user":1,"title2":"some title2", "content":"some content2"}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # HTTP_200_OK
+        # HTTP_201_CREATED
         # HTTP_400_BAD_REQUEST
-
-
+        # HTTP_401_UNAUTHORIZED
+        # HTTP_403_FORBIDDEN
+        # HTTP_405_METHOD_NOT_ALLOWED

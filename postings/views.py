@@ -24,7 +24,7 @@ class BlogPostAPIView(generics.CreateAPIView):
 class BlogPostAPIMixView(mixins.CreateModelMixin, generics.ListAPIView):
     lookup_field = 'id'
     serializer_class = BlogPostSerializer
-    permission_class = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         qs = BlogPost.objects.all()
@@ -45,7 +45,7 @@ class BlogPostAPIMixView(mixins.CreateModelMixin, generics.ListAPIView):
 class BlogPostRudView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
     serializer_class = BlogPostSerializer
-    permission_class = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         return BlogPost.objects.all()
